@@ -800,6 +800,198 @@ static void mavlink_test_control_status(uint8_t system_id, uint8_t component_id,
 #endif
 }
 
+static void mavlink_test_tilt_angle_setpoint(uint8_t system_id, uint8_t component_id, mavlink_message_t *last_msg)
+{
+#ifdef MAVLINK_STATUS_FLAG_OUT_MAVLINK1
+    mavlink_status_t *status = mavlink_get_channel_status(MAVLINK_COMM_0);
+        if ((status->flags & MAVLINK_STATUS_FLAG_OUT_MAVLINK1) && MAVLINK_MSG_ID_TILT_ANGLE_SETPOINT >= 256) {
+            return;
+        }
+#endif
+    mavlink_message_t msg;
+        uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
+        uint16_t i;
+    mavlink_tilt_angle_setpoint_t packet_in = {
+        963497464,45.0,73.0,101.0,129.0
+    };
+    mavlink_tilt_angle_setpoint_t packet1, packet2;
+        memset(&packet1, 0, sizeof(packet1));
+        packet1.time_boot_ms = packet_in.time_boot_ms;
+        packet1.tilt_fl = packet_in.tilt_fl;
+        packet1.tilt_fr = packet_in.tilt_fr;
+        packet1.tilt_rl = packet_in.tilt_rl;
+        packet1.tilt_rr = packet_in.tilt_rr;
+        
+        
+#ifdef MAVLINK_STATUS_FLAG_OUT_MAVLINK1
+        if (status->flags & MAVLINK_STATUS_FLAG_OUT_MAVLINK1) {
+           // cope with extensions
+           memset(MAVLINK_MSG_ID_TILT_ANGLE_SETPOINT_MIN_LEN + (char *)&packet1, 0, sizeof(packet1)-MAVLINK_MSG_ID_TILT_ANGLE_SETPOINT_MIN_LEN);
+        }
+#endif
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_tilt_angle_setpoint_encode(system_id, component_id, &msg, &packet1);
+    mavlink_msg_tilt_angle_setpoint_decode(&msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_tilt_angle_setpoint_pack(system_id, component_id, &msg , packet1.time_boot_ms , packet1.tilt_fl , packet1.tilt_fr , packet1.tilt_rl , packet1.tilt_rr );
+    mavlink_msg_tilt_angle_setpoint_decode(&msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_tilt_angle_setpoint_pack_chan(system_id, component_id, MAVLINK_COMM_0, &msg , packet1.time_boot_ms , packet1.tilt_fl , packet1.tilt_fr , packet1.tilt_rl , packet1.tilt_rr );
+    mavlink_msg_tilt_angle_setpoint_decode(&msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+        memset(&packet2, 0, sizeof(packet2));
+        mavlink_msg_to_send_buffer(buffer, &msg);
+        for (i=0; i<mavlink_msg_get_send_buffer_length(&msg); i++) {
+            comm_send_ch(MAVLINK_COMM_0, buffer[i]);
+        }
+    mavlink_msg_tilt_angle_setpoint_decode(last_msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+        
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_tilt_angle_setpoint_send(MAVLINK_COMM_1 , packet1.time_boot_ms , packet1.tilt_fl , packet1.tilt_fr , packet1.tilt_rl , packet1.tilt_rr );
+    mavlink_msg_tilt_angle_setpoint_decode(last_msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+#ifdef MAVLINK_HAVE_GET_MESSAGE_INFO
+    MAVLINK_ASSERT(mavlink_get_message_info_by_name("TILT_ANGLE_SETPOINT") != NULL);
+    MAVLINK_ASSERT(mavlink_get_message_info_by_id(MAVLINK_MSG_ID_TILT_ANGLE_SETPOINT) != NULL);
+#endif
+}
+
+static void mavlink_test_tilt_status(uint8_t system_id, uint8_t component_id, mavlink_message_t *last_msg)
+{
+#ifdef MAVLINK_STATUS_FLAG_OUT_MAVLINK1
+    mavlink_status_t *status = mavlink_get_channel_status(MAVLINK_COMM_0);
+        if ((status->flags & MAVLINK_STATUS_FLAG_OUT_MAVLINK1) && MAVLINK_MSG_ID_TILT_STATUS >= 256) {
+            return;
+        }
+#endif
+    mavlink_message_t msg;
+        uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
+        uint16_t i;
+    mavlink_tilt_status_t packet_in = {
+        963497464,{ 45.0, 46.0, 47.0, 48.0 },{ 157.0, 158.0, 159.0, 160.0 },{ 269.0, 270.0, 271.0, 272.0 },{ 963500168, 963500169, 963500170, 963500171 },{ 493.0, 494.0, 495.0, 496.0 },{ 21603, 21604, 21605, 21606 },{ 25, 26, 27, 28 }
+    };
+    mavlink_tilt_status_t packet1, packet2;
+        memset(&packet1, 0, sizeof(packet1));
+        packet1.time_boot_ms = packet_in.time_boot_ms;
+        
+        mav_array_memcpy(packet1.angle, packet_in.angle, sizeof(float)*4);
+        mav_array_memcpy(packet1.angular_vel, packet_in.angular_vel, sizeof(float)*4);
+        mav_array_memcpy(packet1.voltage, packet_in.voltage, sizeof(float)*4);
+        mav_array_memcpy(packet1.current, packet_in.current, sizeof(int32_t)*4);
+        mav_array_memcpy(packet1.temperature, packet_in.temperature, sizeof(float)*4);
+        mav_array_memcpy(packet1.realtime_tick, packet_in.realtime_tick, sizeof(uint16_t)*4);
+        mav_array_memcpy(packet1.error_status, packet_in.error_status, sizeof(uint8_t)*4);
+        
+#ifdef MAVLINK_STATUS_FLAG_OUT_MAVLINK1
+        if (status->flags & MAVLINK_STATUS_FLAG_OUT_MAVLINK1) {
+           // cope with extensions
+           memset(MAVLINK_MSG_ID_TILT_STATUS_MIN_LEN + (char *)&packet1, 0, sizeof(packet1)-MAVLINK_MSG_ID_TILT_STATUS_MIN_LEN);
+        }
+#endif
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_tilt_status_encode(system_id, component_id, &msg, &packet1);
+    mavlink_msg_tilt_status_decode(&msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_tilt_status_pack(system_id, component_id, &msg , packet1.time_boot_ms , packet1.realtime_tick , packet1.error_status , packet1.angle , packet1.angular_vel , packet1.voltage , packet1.current , packet1.temperature );
+    mavlink_msg_tilt_status_decode(&msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_tilt_status_pack_chan(system_id, component_id, MAVLINK_COMM_0, &msg , packet1.time_boot_ms , packet1.realtime_tick , packet1.error_status , packet1.angle , packet1.angular_vel , packet1.voltage , packet1.current , packet1.temperature );
+    mavlink_msg_tilt_status_decode(&msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+        memset(&packet2, 0, sizeof(packet2));
+        mavlink_msg_to_send_buffer(buffer, &msg);
+        for (i=0; i<mavlink_msg_get_send_buffer_length(&msg); i++) {
+            comm_send_ch(MAVLINK_COMM_0, buffer[i]);
+        }
+    mavlink_msg_tilt_status_decode(last_msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+        
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_tilt_status_send(MAVLINK_COMM_1 , packet1.time_boot_ms , packet1.realtime_tick , packet1.error_status , packet1.angle , packet1.angular_vel , packet1.voltage , packet1.current , packet1.temperature );
+    mavlink_msg_tilt_status_decode(last_msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+#ifdef MAVLINK_HAVE_GET_MESSAGE_INFO
+    MAVLINK_ASSERT(mavlink_get_message_info_by_name("TILT_STATUS") != NULL);
+    MAVLINK_ASSERT(mavlink_get_message_info_by_id(MAVLINK_MSG_ID_TILT_STATUS) != NULL);
+#endif
+}
+
+static void mavlink_test_control_surface_cmd(uint8_t system_id, uint8_t component_id, mavlink_message_t *last_msg)
+{
+#ifdef MAVLINK_STATUS_FLAG_OUT_MAVLINK1
+    mavlink_status_t *status = mavlink_get_channel_status(MAVLINK_COMM_0);
+        if ((status->flags & MAVLINK_STATUS_FLAG_OUT_MAVLINK1) && MAVLINK_MSG_ID_CONTROL_SURFACE_CMD >= 256) {
+            return;
+        }
+#endif
+    mavlink_message_t msg;
+        uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
+        uint16_t i;
+    mavlink_control_surface_cmd_t packet_in = {
+        963497464,45.0,73.0,101.0,129.0
+    };
+    mavlink_control_surface_cmd_t packet1, packet2;
+        memset(&packet1, 0, sizeof(packet1));
+        packet1.time_boot_ms = packet_in.time_boot_ms;
+        packet1.left_aileron = packet_in.left_aileron;
+        packet1.right_aileron = packet_in.right_aileron;
+        packet1.left_ruddervator = packet_in.left_ruddervator;
+        packet1.right_ruddervator = packet_in.right_ruddervator;
+        
+        
+#ifdef MAVLINK_STATUS_FLAG_OUT_MAVLINK1
+        if (status->flags & MAVLINK_STATUS_FLAG_OUT_MAVLINK1) {
+           // cope with extensions
+           memset(MAVLINK_MSG_ID_CONTROL_SURFACE_CMD_MIN_LEN + (char *)&packet1, 0, sizeof(packet1)-MAVLINK_MSG_ID_CONTROL_SURFACE_CMD_MIN_LEN);
+        }
+#endif
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_control_surface_cmd_encode(system_id, component_id, &msg, &packet1);
+    mavlink_msg_control_surface_cmd_decode(&msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_control_surface_cmd_pack(system_id, component_id, &msg , packet1.time_boot_ms , packet1.left_aileron , packet1.right_aileron , packet1.left_ruddervator , packet1.right_ruddervator );
+    mavlink_msg_control_surface_cmd_decode(&msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_control_surface_cmd_pack_chan(system_id, component_id, MAVLINK_COMM_0, &msg , packet1.time_boot_ms , packet1.left_aileron , packet1.right_aileron , packet1.left_ruddervator , packet1.right_ruddervator );
+    mavlink_msg_control_surface_cmd_decode(&msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+        memset(&packet2, 0, sizeof(packet2));
+        mavlink_msg_to_send_buffer(buffer, &msg);
+        for (i=0; i<mavlink_msg_get_send_buffer_length(&msg); i++) {
+            comm_send_ch(MAVLINK_COMM_0, buffer[i]);
+        }
+    mavlink_msg_control_surface_cmd_decode(last_msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+        
+        memset(&packet2, 0, sizeof(packet2));
+    mavlink_msg_control_surface_cmd_send(MAVLINK_COMM_1 , packet1.time_boot_ms , packet1.left_aileron , packet1.right_aileron , packet1.left_ruddervator , packet1.right_ruddervator );
+    mavlink_msg_control_surface_cmd_decode(last_msg, &packet2);
+        MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
+
+#ifdef MAVLINK_HAVE_GET_MESSAGE_INFO
+    MAVLINK_ASSERT(mavlink_get_message_info_by_name("CONTROL_SURFACE_CMD") != NULL);
+    MAVLINK_ASSERT(mavlink_get_message_info_by_id(MAVLINK_MSG_ID_CONTROL_SURFACE_CMD) != NULL);
+#endif
+}
+
 static void mavlink_test_development(uint8_t system_id, uint8_t component_id, mavlink_message_t *last_msg)
 {
     mavlink_test_airspeed(system_id, component_id, last_msg);
@@ -814,6 +1006,9 @@ static void mavlink_test_development(uint8_t system_id, uint8_t component_id, ma
     mavlink_test_target_absolute(system_id, component_id, last_msg);
     mavlink_test_target_relative(system_id, component_id, last_msg);
     mavlink_test_control_status(system_id, component_id, last_msg);
+    mavlink_test_tilt_angle_setpoint(system_id, component_id, last_msg);
+    mavlink_test_tilt_status(system_id, component_id, last_msg);
+    mavlink_test_control_surface_cmd(system_id, component_id, last_msg);
 }
 
 #ifdef __cplusplus
