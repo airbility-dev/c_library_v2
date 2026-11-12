@@ -3,16 +3,17 @@
 
 #define MAVLINK_MSG_ID_TARGET_LOS_MAV 61000
 
-
+MAVPACKED(
 typedef struct __mavlink_target_los_mav_t {
  float los_unit[3]; /*<  Unit direction towards the target in camera FRD axes, ordered X, Y, Z.*/
  float los_rate[3]; /*<  Time derivative of los_unit in camera FRD axes, ordered X, Y, Z, in 1/s. This is a vector derivative, not the LOS angular-velocity vector.*/
  uint8_t valid; /*<  1 if the input tracker reports a confirmed lock, otherwise 0. Receivers must also check freshness; an old valid sample is not a current lock.*/
-} mavlink_target_los_mav_t;
+ float time_to_contact; /*< [s] Estimated time to contact at the input capture instant. Positive when available; NaN when input is invalid/stale or the estimate is unavailable/unreliable. Zero means unavailable from legacy senders. Availability is independent of LOS validity.*/
+}) mavlink_target_los_mav_t;
 
-#define MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN 25
+#define MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN 29
 #define MAVLINK_MSG_ID_TARGET_LOS_MAV_MIN_LEN 25
-#define MAVLINK_MSG_ID_61000_LEN 25
+#define MAVLINK_MSG_ID_61000_LEN 29
 #define MAVLINK_MSG_ID_61000_MIN_LEN 25
 
 #define MAVLINK_MSG_ID_TARGET_LOS_MAV_CRC 129
@@ -25,19 +26,21 @@ typedef struct __mavlink_target_los_mav_t {
 #define MAVLINK_MESSAGE_INFO_TARGET_LOS_MAV { \
     61000, \
     "TARGET_LOS_MAV", \
-    3, \
+    4, \
     {  { "los_unit", NULL, MAVLINK_TYPE_FLOAT, 3, 0, offsetof(mavlink_target_los_mav_t, los_unit) }, \
          { "los_rate", NULL, MAVLINK_TYPE_FLOAT, 3, 12, offsetof(mavlink_target_los_mav_t, los_rate) }, \
          { "valid", NULL, MAVLINK_TYPE_UINT8_T, 0, 24, offsetof(mavlink_target_los_mav_t, valid) }, \
+         { "time_to_contact", NULL, MAVLINK_TYPE_FLOAT, 0, 25, offsetof(mavlink_target_los_mav_t, time_to_contact) }, \
          } \
 }
 #else
 #define MAVLINK_MESSAGE_INFO_TARGET_LOS_MAV { \
     "TARGET_LOS_MAV", \
-    3, \
+    4, \
     {  { "los_unit", NULL, MAVLINK_TYPE_FLOAT, 3, 0, offsetof(mavlink_target_los_mav_t, los_unit) }, \
          { "los_rate", NULL, MAVLINK_TYPE_FLOAT, 3, 12, offsetof(mavlink_target_los_mav_t, los_rate) }, \
          { "valid", NULL, MAVLINK_TYPE_UINT8_T, 0, 24, offsetof(mavlink_target_los_mav_t, valid) }, \
+         { "time_to_contact", NULL, MAVLINK_TYPE_FLOAT, 0, 25, offsetof(mavlink_target_los_mav_t, time_to_contact) }, \
          } \
 }
 #endif
@@ -51,20 +54,23 @@ typedef struct __mavlink_target_los_mav_t {
  * @param los_unit  Unit direction towards the target in camera FRD axes, ordered X, Y, Z.
  * @param los_rate  Time derivative of los_unit in camera FRD axes, ordered X, Y, Z, in 1/s. This is a vector derivative, not the LOS angular-velocity vector.
  * @param valid  1 if the input tracker reports a confirmed lock, otherwise 0. Receivers must also check freshness; an old valid sample is not a current lock.
+ * @param time_to_contact [s] Estimated time to contact at the input capture instant. Positive when available; NaN when input is invalid/stale or the estimate is unavailable/unreliable. Zero means unavailable from legacy senders. Availability is independent of LOS validity.
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_target_los_mav_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
-                               const float *los_unit, const float *los_rate, uint8_t valid)
+                               const float *los_unit, const float *los_rate, uint8_t valid, float time_to_contact)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN];
     _mav_put_uint8_t(buf, 24, valid);
+    _mav_put_float(buf, 25, time_to_contact);
     _mav_put_float_array(buf, 0, los_unit, 3);
     _mav_put_float_array(buf, 12, los_rate, 3);
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN);
 #else
     mavlink_target_los_mav_t packet;
     packet.valid = valid;
+    packet.time_to_contact = time_to_contact;
     mav_array_assign_float(packet.los_unit, los_unit, 3);
     mav_array_assign_float(packet.los_rate, los_rate, 3);
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), &packet, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN);
@@ -84,20 +90,23 @@ static inline uint16_t mavlink_msg_target_los_mav_pack(uint8_t system_id, uint8_
  * @param los_unit  Unit direction towards the target in camera FRD axes, ordered X, Y, Z.
  * @param los_rate  Time derivative of los_unit in camera FRD axes, ordered X, Y, Z, in 1/s. This is a vector derivative, not the LOS angular-velocity vector.
  * @param valid  1 if the input tracker reports a confirmed lock, otherwise 0. Receivers must also check freshness; an old valid sample is not a current lock.
+ * @param time_to_contact [s] Estimated time to contact at the input capture instant. Positive when available; NaN when input is invalid/stale or the estimate is unavailable/unreliable. Zero means unavailable from legacy senders. Availability is independent of LOS validity.
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_target_los_mav_pack_status(uint8_t system_id, uint8_t component_id, mavlink_status_t *_status, mavlink_message_t* msg,
-                               const float *los_unit, const float *los_rate, uint8_t valid)
+                               const float *los_unit, const float *los_rate, uint8_t valid, float time_to_contact)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN];
     _mav_put_uint8_t(buf, 24, valid);
+    _mav_put_float(buf, 25, time_to_contact);
     _mav_put_float_array(buf, 0, los_unit, 3);
     _mav_put_float_array(buf, 12, los_rate, 3);
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN);
 #else
     mavlink_target_los_mav_t packet;
     packet.valid = valid;
+    packet.time_to_contact = time_to_contact;
     mav_array_memcpy(packet.los_unit, los_unit, sizeof(float)*3);
     mav_array_memcpy(packet.los_rate, los_rate, sizeof(float)*3);
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), &packet, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN);
@@ -120,21 +129,24 @@ static inline uint16_t mavlink_msg_target_los_mav_pack_status(uint8_t system_id,
  * @param los_unit  Unit direction towards the target in camera FRD axes, ordered X, Y, Z.
  * @param los_rate  Time derivative of los_unit in camera FRD axes, ordered X, Y, Z, in 1/s. This is a vector derivative, not the LOS angular-velocity vector.
  * @param valid  1 if the input tracker reports a confirmed lock, otherwise 0. Receivers must also check freshness; an old valid sample is not a current lock.
+ * @param time_to_contact [s] Estimated time to contact at the input capture instant. Positive when available; NaN when input is invalid/stale or the estimate is unavailable/unreliable. Zero means unavailable from legacy senders. Availability is independent of LOS validity.
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_target_los_mav_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
                                mavlink_message_t* msg,
-                                   const float *los_unit,const float *los_rate,uint8_t valid)
+                                   const float *los_unit,const float *los_rate,uint8_t valid,float time_to_contact)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN];
     _mav_put_uint8_t(buf, 24, valid);
+    _mav_put_float(buf, 25, time_to_contact);
     _mav_put_float_array(buf, 0, los_unit, 3);
     _mav_put_float_array(buf, 12, los_rate, 3);
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN);
 #else
     mavlink_target_los_mav_t packet;
     packet.valid = valid;
+    packet.time_to_contact = time_to_contact;
     mav_array_assign_float(packet.los_unit, los_unit, 3);
     mav_array_assign_float(packet.los_rate, los_rate, 3);
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), &packet, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN);
@@ -154,7 +166,7 @@ static inline uint16_t mavlink_msg_target_los_mav_pack_chan(uint8_t system_id, u
  */
 static inline uint16_t mavlink_msg_target_los_mav_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_target_los_mav_t* target_los_mav)
 {
-    return mavlink_msg_target_los_mav_pack(system_id, component_id, msg, target_los_mav->los_unit, target_los_mav->los_rate, target_los_mav->valid);
+    return mavlink_msg_target_los_mav_pack(system_id, component_id, msg, target_los_mav->los_unit, target_los_mav->los_rate, target_los_mav->valid, target_los_mav->time_to_contact);
 }
 
 /**
@@ -168,7 +180,7 @@ static inline uint16_t mavlink_msg_target_los_mav_encode(uint8_t system_id, uint
  */
 static inline uint16_t mavlink_msg_target_los_mav_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_target_los_mav_t* target_los_mav)
 {
-    return mavlink_msg_target_los_mav_pack_chan(system_id, component_id, chan, msg, target_los_mav->los_unit, target_los_mav->los_rate, target_los_mav->valid);
+    return mavlink_msg_target_los_mav_pack_chan(system_id, component_id, chan, msg, target_los_mav->los_unit, target_los_mav->los_rate, target_los_mav->valid, target_los_mav->time_to_contact);
 }
 
 /**
@@ -182,7 +194,7 @@ static inline uint16_t mavlink_msg_target_los_mav_encode_chan(uint8_t system_id,
  */
 static inline uint16_t mavlink_msg_target_los_mav_encode_status(uint8_t system_id, uint8_t component_id, mavlink_status_t* _status, mavlink_message_t* msg, const mavlink_target_los_mav_t* target_los_mav)
 {
-    return mavlink_msg_target_los_mav_pack_status(system_id, component_id, _status, msg,  target_los_mav->los_unit, target_los_mav->los_rate, target_los_mav->valid);
+    return mavlink_msg_target_los_mav_pack_status(system_id, component_id, _status, msg,  target_los_mav->los_unit, target_los_mav->los_rate, target_los_mav->valid, target_los_mav->time_to_contact);
 }
 
 /**
@@ -192,20 +204,23 @@ static inline uint16_t mavlink_msg_target_los_mav_encode_status(uint8_t system_i
  * @param los_unit  Unit direction towards the target in camera FRD axes, ordered X, Y, Z.
  * @param los_rate  Time derivative of los_unit in camera FRD axes, ordered X, Y, Z, in 1/s. This is a vector derivative, not the LOS angular-velocity vector.
  * @param valid  1 if the input tracker reports a confirmed lock, otherwise 0. Receivers must also check freshness; an old valid sample is not a current lock.
+ * @param time_to_contact [s] Estimated time to contact at the input capture instant. Positive when available; NaN when input is invalid/stale or the estimate is unavailable/unreliable. Zero means unavailable from legacy senders. Availability is independent of LOS validity.
  */
 #ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS
 
-static inline void mavlink_msg_target_los_mav_send(mavlink_channel_t chan, const float *los_unit, const float *los_rate, uint8_t valid)
+static inline void mavlink_msg_target_los_mav_send(mavlink_channel_t chan, const float *los_unit, const float *los_rate, uint8_t valid, float time_to_contact)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN];
     _mav_put_uint8_t(buf, 24, valid);
+    _mav_put_float(buf, 25, time_to_contact);
     _mav_put_float_array(buf, 0, los_unit, 3);
     _mav_put_float_array(buf, 12, los_rate, 3);
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_TARGET_LOS_MAV, buf, MAVLINK_MSG_ID_TARGET_LOS_MAV_MIN_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_CRC);
 #else
     mavlink_target_los_mav_t packet;
     packet.valid = valid;
+    packet.time_to_contact = time_to_contact;
     mav_array_assign_float(packet.los_unit, los_unit, 3);
     mav_array_assign_float(packet.los_rate, los_rate, 3);
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_TARGET_LOS_MAV, (const char *)&packet, MAVLINK_MSG_ID_TARGET_LOS_MAV_MIN_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_CRC);
@@ -220,7 +235,7 @@ static inline void mavlink_msg_target_los_mav_send(mavlink_channel_t chan, const
 static inline void mavlink_msg_target_los_mav_send_struct(mavlink_channel_t chan, const mavlink_target_los_mav_t* target_los_mav)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-    mavlink_msg_target_los_mav_send(chan, target_los_mav->los_unit, target_los_mav->los_rate, target_los_mav->valid);
+    mavlink_msg_target_los_mav_send(chan, target_los_mav->los_unit, target_los_mav->los_rate, target_los_mav->valid, target_los_mav->time_to_contact);
 #else
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_TARGET_LOS_MAV, (const char *)target_los_mav, MAVLINK_MSG_ID_TARGET_LOS_MAV_MIN_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_CRC);
 #endif
@@ -234,17 +249,19 @@ static inline void mavlink_msg_target_los_mav_send_struct(mavlink_channel_t chan
   is usually the receive buffer for the channel, and allows a reply to an
   incoming message with minimum stack space usage.
  */
-static inline void mavlink_msg_target_los_mav_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  const float *los_unit, const float *los_rate, uint8_t valid)
+static inline void mavlink_msg_target_los_mav_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  const float *los_unit, const float *los_rate, uint8_t valid, float time_to_contact)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char *buf = (char *)msgbuf;
     _mav_put_uint8_t(buf, 24, valid);
+    _mav_put_float(buf, 25, time_to_contact);
     _mav_put_float_array(buf, 0, los_unit, 3);
     _mav_put_float_array(buf, 12, los_rate, 3);
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_TARGET_LOS_MAV, buf, MAVLINK_MSG_ID_TARGET_LOS_MAV_MIN_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_CRC);
 #else
     mavlink_target_los_mav_t *packet = (mavlink_target_los_mav_t *)msgbuf;
     packet->valid = valid;
+    packet->time_to_contact = time_to_contact;
     mav_array_assign_float(packet->los_unit, los_unit, 3);
     mav_array_assign_float(packet->los_rate, los_rate, 3);
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_TARGET_LOS_MAV, (const char *)packet, MAVLINK_MSG_ID_TARGET_LOS_MAV_MIN_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN, MAVLINK_MSG_ID_TARGET_LOS_MAV_CRC);
@@ -288,6 +305,16 @@ static inline uint8_t mavlink_msg_target_los_mav_get_valid(const mavlink_message
 }
 
 /**
+ * @brief Get field time_to_contact from target_los_mav message
+ *
+ * @return [s] Estimated time to contact at the input capture instant. Positive when available; NaN when input is invalid/stale or the estimate is unavailable/unreliable. Zero means unavailable from legacy senders. Availability is independent of LOS validity.
+ */
+static inline float mavlink_msg_target_los_mav_get_time_to_contact(const mavlink_message_t* msg)
+{
+    return _MAV_RETURN_float(msg,  25);
+}
+
+/**
  * @brief Decode a target_los_mav message into a struct
  *
  * @param msg The message to decode
@@ -299,6 +326,7 @@ static inline void mavlink_msg_target_los_mav_decode(const mavlink_message_t* ms
     mavlink_msg_target_los_mav_get_los_unit(msg, target_los_mav->los_unit);
     mavlink_msg_target_los_mav_get_los_rate(msg, target_los_mav->los_rate);
     target_los_mav->valid = mavlink_msg_target_los_mav_get_valid(msg);
+    target_los_mav->time_to_contact = mavlink_msg_target_los_mav_get_time_to_contact(msg);
 #else
         uint8_t len = msg->len < MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN? msg->len : MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN;
         memset(target_los_mav, 0, MAVLINK_MSG_ID_TARGET_LOS_MAV_LEN);
